@@ -1,28 +1,26 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { expressjwt, GetVerificationKey } from 'express-jwt';
 import { expressJwtSecret } from 'jwks-rsa';
-import { promisify } from 'util';
+import { promisify } from 'node:util';
 
 @Injectable()
 export class AuthorizationGuard implements CanActivate {
   private AUTH0_AUDIENCE: string;
   private AUTH0_DOMAIN: string;
 
-  constructor(
-    private configService: ConfigService
-  ) {
-    this.AUTH0_AUDIENCE = this.configService.get('AUTH0_AUDIENCE') ?? "";
-    this.AUTH0_DOMAIN = this.configService.get('AUTH0_DOMAIN') ?? "";
-  }
-  canActivate(context: ExecutionContext): Promise<boolean> {
-    throw new Error('Method not implemented.');
+  constructor(private configService: ConfigService) {
+    this.AUTH0_AUDIENCE = this.configService.get('AUTH0_AUDIENCE') ?? '';
+    this.AUTH0_DOMAIN = this.configService.get('AUTH0_DOMAIN') ?? '';
   }
 
-  async anActivate(
-    context: ExecutionContext,
-  ): Promise<boolean> {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     // REST:
     // const httpContext = context.switchToHttp();
     // const req = httpContext.getRequest();
@@ -35,20 +33,20 @@ export class AuthorizationGuard implements CanActivate {
           cache: true,
           rateLimit: true,
           jwksRequestsPerMinute: 5,
-          jwksUri: `${this.AUTH0_DOMAIN}.well-known/jwks`
+          jwksUri: `${this.AUTH0_DOMAIN}.well-known/jwks`,
         }) as GetVerificationKey,
         audience: this.AUTH0_AUDIENCE,
         issuer: this.AUTH0_DOMAIN,
         algorithms: ['RS256'],
-      })
-    )
+      }),
+    );
 
     try {
-      checkJWT(req, res);
+      await checkJWT(req, res);
 
       return true;
     } catch (err) {
-      throw new UnauthorizedException(err)
+      throw new UnauthorizedException(err);
     }
   }
 }
