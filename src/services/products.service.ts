@@ -15,7 +15,7 @@ export class ProductsService {
   }
 
   async getProductById(id: string) {
-    return await this.prisma.product.findFirst({
+    return await this.prisma.product.findUnique({
       where: {
         id,
       },
