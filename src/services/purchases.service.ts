@@ -10,8 +10,19 @@ interface CreatePurchaseParams {
 export class PurchasesService {
   constructor(private prisma: PrismaService) {}
 
-  listAllPurchases() {
-    return this.prisma.purchase.findMany({
+  async listAllPurchases() {
+    return await this.prisma.purchase.findMany({
+      orderBy: {
+        createdAt: `desc`,
+      },
+    });
+  }
+
+  async listAllFromCustomer(customerId: string) {
+    return await this.prisma.purchase.findMany({
+      where: {
+        customerId,
+      },
       orderBy: {
         createdAt: `desc`,
       },
